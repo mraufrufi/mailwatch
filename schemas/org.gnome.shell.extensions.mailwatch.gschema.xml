@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.mailwatch" path="/org/gnome/shell/extensions/mailwatch/">
+    <key name="accounts" type="s">
+      <default>'[]'</default>
+      <summary>Configured accounts (JSON, without passwords)</summary>
+    </key>
+    <key name="revision" type="i">
+      <default>0</default>
+      <summary>Bumped by preferences to make the extension reload accounts</summary>
+    </key>
+    <key name="show-notifications" type="b">
+      <default>true</default>
+      <summary>Show a desktop notification for each new email</summary>
+    </key>
+    <key name="notification-sound" type="b">
+      <default>true</default>
+      <summary>Play a sound with new mail notifications</summary>
+    </key>
+    <key name="mark-read-on-click" type="b">
+      <default>true</default>
+      <summary>Mark a message as read when opened from the list</summary>
+    </key>
+  </schema>
+</schemalist>

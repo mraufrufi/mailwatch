@@ -1,0 +1,71 @@
+.mw-panel-box { spacing: 4px; }
+
+.mw-badge {
+  background-color: #e01b24;
+  color: white;
+  font-size: 0.75em;
+  font-weight: bold;
+  border-radius: 99px;
+  padding: 0 6px;
+  min-height: 16px;
+  min-width: 10px;
+  text-align: center;
+}
+
+.mw-menu { min-width: 400px; }
+
+.mw-header {
+  padding: 8px 10px 6px 14px;
+  spacing: 2px;
+}
+.mw-title { font-size: 1.1em; font-weight: bold; }
+
+.mw-icon-button {
+  padding: 6px;
+  border-radius: 99px;
+  color: #c0bfbc;
+}
+.mw-icon-button:hover,
+.mw-icon-button:focus { background-color: rgba(255,255,255,0.12); color: white; }
+
+.mw-error {
+  color: #ff7b63;
+  font-size: 0.9em;
+  padding: 4px 16px 8px 16px;
+}
+
+.mw-scroll {
+  width: 400px;
+  max-height: 460px;
+}
+.mw-list { padding: 4px 6px 8px 6px; spacing: 2px; }
+
+.mw-row {
+  padding: 8px 8px 8px 8px;
+  border-radius: 10px;
+}
+.mw-row:hover,
+.mw-row:focus { background-color: rgba(255,255,255,0.09); }
+
+.mw-avatar {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 99px;
+  margin-right: 12px;
+}
+.mw-avatar-text { color: white; font-weight: bold; font-size: 1.1em; }
+
+.mw-col { spacing: 1px; }
+.mw-sender { font-weight: bold; }
+.mw-time { font-size: 0.85em; color: #9a9996; margin-left: 8px; }
+.mw-subject { color: #deddda; }
+.mw-meta { font-size: 0.85em; color: #9a9996; }
+
+.mw-row-action { margin-left: 4px; }
+
+.mw-more { color: #9a9996; padding: 6px 12px; font-size: 0.9em; }
+
+.mw-empty { padding: 36px 20px; spacing: 6px; }
+.mw-empty-icon { color: #77767b; margin-bottom: 4px; }
+.mw-empty-title { font-weight: bold; font-size: 1.1em; }
+.mw-empty-sub { color: #9a9996; }
