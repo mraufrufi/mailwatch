@@ -52,7 +52,7 @@ class MailIndicator extends PanelMenu.Button {
     _init(ext) {
         super._init(0.0, 'Mail Watch', false);
         this._ext = ext;
-        this._messages = [];
+        this._groups = [];
         this._total = 0;
         this._errors = [];
         this._hasAccounts = false;
@@ -86,6 +86,8 @@ class MailIndicator extends PanelMenu.Button {
             y_align: Clutter.ActorAlign.CENTER,
         });
         header.add_child(this._title);
+        header.add_child(this._iconButton('edit-clear-all-symbolic', 'Clear list (mails stay unread)',
+            () => this._ext.dismissAll()));
         header.add_child(this._iconButton('object-select-symbolic', 'Mark all as read',
             () => this._ext.markAllRead()));
         header.add_child(this._iconButton('view-refresh-symbolic', 'Refresh',
@@ -132,8 +134,8 @@ class MailIndicator extends PanelMenu.Button {
         return btn;
     }
 
-    update(messages, total, errors, hasAccounts) {
-        this._messages = messages;
+    update(groups, total, errors, hasAccounts) {
+        this._groups = groups;
         this._total = total;
         this._errors = errors;
         this._hasAccounts = hasAccounts;
@@ -157,22 +159,48 @@ class MailIndicator extends PanelMenu.Button {
                 'No accounts yet', 'Open settings to add an email account.'));
             return;
         }
-        if (this._messages.length === 0) {
+        if (this._groups.length === 0) {
             this._list.add_child(this._emptyState('emblem-ok-symbolic',
                 'All caught up', 'No unread messages.'));
             return;
         }
 
-        const multi = this._ext.accountCount() > 1;
-        for (const msg of this._messages)
-            this._list.add_child(this._makeRow(msg, multi));
-
-        if (this._total > this._messages.length) {
-            this._list.add_child(new St.Label({
-                text: `and ${this._total - this._messages.length} more…`,
-                style_class: 'mw-more',
-            }));
+        for (const group of this._groups) {
+            this._list.add_child(this._makeGroupHeader(group));
+            for (const msg of group.messages)
+                this._list.add_child(this._makeRow(msg));
+            if (group.more > 0) {
+                this._list.add_child(new St.Label({
+                    text: `and ${group.more} more…`,
+                    style_class: 'mw-more',
+                }));
+            }
         }
+    }
+
+    _makeGroupHeader(group) {
+        const box = new St.BoxLayout({style_class: 'mw-group', x_expand: true});
+        box.add_child(new St.Bin({
+            style_class: 'mw-group-dot',
+            style: `background-color: ${colorFor(group.name)};`,
+            y_align: Clutter.ActorAlign.CENTER,
+        }));
+        box.add_child(ellipsize(new St.Label({
+            text: group.name,
+            style_class: 'mw-group-name',
+            x_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        })));
+        box.add_child(new St.Label({
+            text: `${group.total}`,
+            style_class: 'mw-group-count',
+            y_align: Clutter.ActorAlign.CENTER,
+        }));
+        const clear = this._iconButton('window-close-symbolic',
+            'Dismiss this account\'s list', () => this._ext.dismissGroup(group));
+        clear.add_style_class_name('mw-group-clear');
+        box.add_child(clear);
+        return box;
     }
 
     _emptyState(iconName, title, subtitle) {
@@ -196,7 +224,7 @@ class MailIndicator extends PanelMenu.Button {
         return box;
     }
 
-    _makeRow(msg, showAccount) {
+    _makeRow(msg) {
         const row = new St.Button({
             style_class: 'mw-row',
             can_focus: true,
@@ -237,11 +265,13 @@ class MailIndicator extends PanelMenu.Button {
         col.add_child(top);
         col.add_child(ellipsize(new St.Label({text: msg.subject, style_class: 'mw-subject'})));
 
-        let meta = msg.email || '';
-        if (showAccount)
-            meta = meta ? `${meta}  ·  ${msg.accountName}` : msg.accountName;
-        col.add_child(ellipsize(new St.Label({text: meta, style_class: 'mw-meta'})));
+        col.add_child(ellipsize(new St.Label({text: msg.email || '', style_class: 'mw-meta'})));
         h.add_child(col);
+
+        const dismissBtn = this._iconButton('window-close-symbolic',
+            'Dismiss (keep unread)', () => this._ext.dismiss(msg));
+        dismissBtn.add_style_class_name('mw-row-action');
+        h.add_child(dismissBtn);
 
         const readBtn = this._iconButton('object-select-symbolic', 'Mark as read',
             () => this._ext.markRead(msg));
@@ -265,6 +295,7 @@ export default class MailWatchExtension extends Extension {
         this._status = new Map();   // accountId -> {state, error}
         this._gen = 0;
         this._source = null;
+        this._dismissed = this._loadDismissed();
 
         this._indicator = new MailIndicator(this);
         Main.panel.addToStatusArea(this.uuid, this._indicator);
@@ -301,6 +332,42 @@ export default class MailWatchExtension extends Extension {
         this._settings = null;
         this._store = null;
         this._status = null;
+        this._dismissed = null;
+    }
+
+    // ---- dismissed (hidden from list, still unread on the server) --------
+    _loadDismissed() {
+        try {
+            return new Set(JSON.parse(this._settings.get_string('dismissed')));
+        } catch (e) {
+            return new Set();
+        }
+    }
+
+    _saveDismissed() {
+        const list = [...this._dismissed].slice(-1000);
+        this._settings.set_string('dismissed', JSON.stringify(list));
+    }
+
+    dismiss(msg) {
+        this._dismissed.add(`${msg.account}:${msg.uid}`);
+        this._saveDismissed();
+        this._render();
+    }
+
+    dismissGroup(group) {
+        for (const m of group.messages)
+            this._dismissed.add(`${m.account}:${m.uid}`);
+        this._saveDismissed();
+        this._render();
+    }
+
+    dismissAll() {
+        for (const [id, entry] of this._store)
+            for (const m of entry.messages)
+                this._dismissed.add(`${id}:${m.uid}`);
+        this._saveDismissed();
+        this._render();
     }
 
     // ---- accounts --------------------------------------------------------
@@ -438,12 +505,28 @@ export default class MailWatchExtension extends Extension {
             break;
         case 'list':
             this._store.set(ev.account, {messages: ev.messages, total: ev.total});
+            this._pruneDismissed(ev.account, ev.uids);
             break;
         case 'new':
             this._notify(ev.account, ev.messages);
             return;
         }
         this._render();
+    }
+
+    _pruneDismissed(accountId, unreadUids) {
+        if (!unreadUids)
+            return;
+        const live = new Set(unreadUids.map(u => `${accountId}:${u}`));
+        let changed = false;
+        for (const key of [...this._dismissed]) {
+            if (key.startsWith(`${accountId}:`) && !live.has(key)) {
+                this._dismissed.delete(key);
+                changed = true;
+            }
+        }
+        if (changed)
+            this._saveDismissed();
     }
 
     // ---- UI --------------------------------------------------------------
@@ -453,17 +536,26 @@ export default class MailWatchExtension extends Extension {
         const accounts = this._accounts();
         const names = new Map(accounts.map(a => [a.id, a.name || a.email]));
 
-        let all = [];
+        const groups = [];
         let total = 0;
-        for (const [id, entry] of this._store) {
-            if (!names.has(id))
+        for (const acc of accounts) {
+            const entry = this._store.get(acc.id);
+            if (!entry)
                 continue;
-            total += entry.total;
-            for (const m of entry.messages)
-                all.push({...m, accountName: names.get(id)});
+            const visible = entry.messages.filter(m => !this._dismissed.has(`${acc.id}:${m.uid}`));
+            const hidden = entry.messages.length - visible.length;
+            const groupTotal = Math.max(0, entry.total - hidden);
+            if (groupTotal === 0)
+                continue;
+            total += groupTotal;
+            groups.push({
+                id: acc.id,
+                name: names.get(acc.id),
+                total: groupTotal,
+                more: Math.max(0, groupTotal - visible.length),
+                messages: visible.map(m => ({...m, accountName: names.get(acc.id)})),
+            });
         }
-        all.sort((a, b) => b.ts - a.ts);
-        all = all.slice(0, 100);
 
         const errors = [];
         for (const acc of accounts) {
@@ -471,7 +563,7 @@ export default class MailWatchExtension extends Extension {
             if (st?.state === 'error')
                 errors.push(`${names.get(acc.id)}: ${st.error}`);
         }
-        this._indicator.update(all, total, errors, accounts.length > 0);
+        this._indicator.update(groups, total, errors, accounts.length > 0);
     }
 
     // ---- actions ---------------------------------------------------------
@@ -549,7 +641,10 @@ export default class MailWatchExtension extends Extension {
                 const fromLine = m.email ? `${m.sender} <${m.email}>` : m.sender;
                 show(m.subject, `${fromLine}\n${accName}`,
                     () => this.openMessage({...m, account: accountId}),
-                    [['Mark as read', () => this.markRead({...m, account: accountId})]]);
+                    [
+                        ['Dismiss', () => this.dismiss({...m, account: accountId})],
+                        ['Mark as read', () => this.markRead({...m, account: accountId})],
+                    ]);
             }
         } else {
             const senders = [...new Set(messages.map(m => m.sender))].slice(0, 3).join(', ');

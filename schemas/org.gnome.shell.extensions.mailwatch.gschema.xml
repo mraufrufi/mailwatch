@@ -9,6 +9,10 @@
       <default>0</default>
       <summary>Bumped by preferences to make the extension reload accounts</summary>
     </key>
+    <key name="dismissed" type="s">
+      <default>'[]'</default>
+      <summary>Messages hidden from the list (still unread on the server), as accountId:uid</summary>
+    </key>
     <key name="show-notifications" type="b">
       <default>true</default>
       <summary>Show a desktop notification for each new email</summary>

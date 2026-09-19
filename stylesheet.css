@@ -69,3 +69,23 @@
 .mw-empty-icon { color: #77767b; margin-bottom: 4px; }
 .mw-empty-title { font-weight: bold; font-size: 1.1em; }
 .mw-empty-sub { color: #9a9996; }
+
+.mw-group {
+  padding: 10px 8px 4px 10px;
+  spacing: 8px;
+}
+.mw-group-dot { min-width: 8px; min-height: 8px; border-radius: 99px; }
+.mw-group-name {
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #c0bfbc;
+}
+.mw-group-count {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: white;
+  background-color: rgba(255,255,255,0.16);
+  border-radius: 99px;
+  padding: 0 8px;
+}
+.mw-group-clear { padding: 3px; }

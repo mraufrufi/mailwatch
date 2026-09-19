@@ -273,7 +273,7 @@ class Worker(threading.Thread):
         messages = sorted((self.cache[u] for u in recent if u in self.cache),
                           key=lambda x: x["ts"], reverse=True)
         emit({"type": "list", "account": self.id, "total": len(uids),
-              "messages": messages})
+              "uids": uids, "messages": messages})
 
         if self.known is not None:
             fresh = [self.cache[u] for u in uids

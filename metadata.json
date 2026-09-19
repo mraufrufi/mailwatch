@@ -2,7 +2,7 @@
   "uuid": "mailwatch@rauf",
   "name": "Mail Watch",
   "description": "Multi-account IMAP unread mail monitor with realtime (IDLE) desktop notifications and a clean unread list in the top bar.",
-  "shell-version": ["49"],
+  "shell-version": ["49", "50"],
   "settings-schema": "org.gnome.shell.extensions.mailwatch",
   "version": 1
 }
