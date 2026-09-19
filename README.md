@@ -1,4 +1,4 @@
-# Mail Watch — GNOME Shell extension (GNOME 49)
+# Mail Watch — GNOME Shell extension (GNOME 49+)
 
 Multi-account unread-mail monitor for the top bar.
 
