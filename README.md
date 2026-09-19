@@ -9,6 +9,10 @@ Multi-account unread-mail monitor for the top bar.
 - Passwords are stored in the GNOME Keyring (libsecret), never in settings files
 - Click a message to open your webmail and mark it read; hover-free check button marks read without opening
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## Install
 
     ./install.sh
@@ -20,7 +24,7 @@ Requirements: GNOME Shell 49, `python3`, and the libsecret typelib (`gir1.2-secr
 
 ## Accounts
 
-Gmail, Yahoo, iCloud, Fastmail and Zoho need an **app password** (enable 2-step verification, then create one in the provider's security settings). Microsoft Outlook.com / Microsoft 365 have disabled password IMAP for most accounts, so they are not supported (they need OAuth2).
+Gmail, Yahoo, iCloud, Fastmail and Zoho need an **app password** (enable 2-step verification, then create one in the provider's security settings). Microsoft Outlook.com / Microsoft 365 have disabled [...]
 
 ## Layout
 
